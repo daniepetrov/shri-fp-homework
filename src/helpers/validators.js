@@ -1,6 +1,6 @@
 /**
  * @file Домашка по FP ч. 1
- * 
+ *
  * Основная задача — написать самому, или найти в FP библиотеках функции anyPass/allPass
  * Эти функции/их аналоги есть и в ramda и в lodash
  *
@@ -13,14 +13,23 @@
  * Если какие либо функции написаны руками (без использования библиотек) это не является ошибкой
  */
 
-// 1. Красная звезда, зеленый квадрат, все остальные белые.
-export const validateFieldN1 = ({star, square, triangle, circle}) => {
-    if (triangle !== 'white' || circle !== 'white') {
-        return false;
-    }
+import { values } from 'lodash';
+import { all, allPass, and, anyPass, equals, forEachObjIndexed, propEq } from 'ramda';
 
-    return star === 'red' && square === 'green';
-};
+const isEqWhite = equals('white');
+const isEqGreen = equals('green');
+const isEqRed = equals('red');
+const isEqBlue = equals('blue');
+const isOrange = equals('orange');
+
+// const  = propEq('star', 'red')
+const isTriangleGreen = propEq('triangle', 'green')
+
+// 1. Красная звезда, зеленый квадрат, все остальные белые.
+export const validateFieldN1 = ({circle, square, triangle, star}) => {
+    all()
+}
+
 
 // 2. Как минимум две фигуры зеленые.
 export const validateFieldN2 = () => false;
@@ -38,13 +47,13 @@ export const validateFieldN5 = () => false;
 export const validateFieldN6 = () => false;
 
 // 7. Все фигуры оранжевые.
-export const validateFieldN7 = () => false;
+export const validateFieldN7 = (colors) => all(isOrange, values(colors))
 
 // 8. Не красная и не белая звезда, остальные – любого цвета.
 export const validateFieldN8 = () => false;
 
 // 9. Все фигуры зеленые.
-export const validateFieldN9 = () => false;
+export const validateFieldN9 = (colors) => all(isEqGreen, values(colors))
 
 // 10. Треугольник и квадрат одного цвета (не белого), остальные – любого цвета
 export const validateFieldN10 = () => false;
