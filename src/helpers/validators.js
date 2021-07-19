@@ -14,7 +14,23 @@
  */
 
 import { values } from 'lodash';
-import { all, allPass, and, anyPass, equals, forEachObjIndexed, propEq } from 'ramda';
+import {
+  all,
+  whereEq,
+  and,
+  anyPass,
+  filter,
+  equals,
+  forEachObjIndexed,
+  propEq,
+  pipe,
+  pick,
+  add,
+  reduceWhile,
+  length,
+  __,
+  gte,
+} from 'ramda';
 
 const isEqWhite = equals('white');
 const isEqGreen = equals('green');
@@ -23,16 +39,19 @@ const isEqBlue = equals('blue');
 const isOrange = equals('orange');
 
 // const  = propEq('star', 'red')
-const isTriangleGreen = propEq('triangle', 'green')
+const isTriangleGreen = propEq('triangle', 'green');
+
+const isColor = propEq();
 
 // 1. Красная звезда, зеленый квадрат, все остальные белые.
-export const validateFieldN1 = ({circle, square, triangle, star}) => {
-    all()
-}
-
+export const validateFieldN1 = (colors) => {
+  return whereEq({ circle: 'white', square: 'green', triangle: 'white', star: 'red' })(colors);
+};
 
 // 2. Как минимум две фигуры зеленые.
-export const validateFieldN2 = () => false;
+export const validateFieldN2 = (colors) => {
+  return pipe(values, filter(isEqGreen), length, gte(__, 2))(colors);
+};
 
 // 3. Количество красных фигур равно кол-ву синих.
 export const validateFieldN3 = () => false;
@@ -47,13 +66,13 @@ export const validateFieldN5 = () => false;
 export const validateFieldN6 = () => false;
 
 // 7. Все фигуры оранжевые.
-export const validateFieldN7 = (colors) => all(isOrange, values(colors))
+export const validateFieldN7 = (colors) => all(isOrange, values(colors));
 
 // 8. Не красная и не белая звезда, остальные – любого цвета.
 export const validateFieldN8 = () => false;
 
 // 9. Все фигуры зеленые.
-export const validateFieldN9 = (colors) => all(isEqGreen, values(colors))
+export const validateFieldN9 = (colors) => all(isEqGreen, values(colors));
 
 // 10. Треугольник и квадрат одного цвета (не белого), остальные – любого цвета
 export const validateFieldN10 = () => false;
