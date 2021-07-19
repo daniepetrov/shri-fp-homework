@@ -16,14 +16,25 @@
 import { values } from 'lodash';
 import {
   all,
-  allPass, and, either, equals,
+  allPass,
+  and,
+  any,
+  countBy,
+  either,
+  equals,
   filter,
-  gte, length, not, omit,
+  gte,
+  identity,
+  length,
+  not,
+  omit,
   pick,
   pipe,
   prop,
   propEq,
-  whereEq, __
+  lte,
+  whereEq,
+  __,
 } from 'ramda';
 
 const isEqWhite = equals('white');
@@ -64,14 +75,11 @@ export const validateFieldN4 = (colors) =>
   whereEq({ circle: 'blue', star: 'red', square: 'orange' })(colors);
 
 // 5. Три фигуры одного любого цвета кроме белого (четыре фигуры одного цвета – это тоже true).
-export const validateFieldN5 = () => {
-  return pipe(
-   values,
-   length,
-   
-
-  )
-}
+export const validateFieldN5 = (colors) => {
+  const threeFiguresSameColor = pipe(values, countBy(identity), values, any(gte(__, 3)));
+  const lessThanOneWhite = pipe(values, filter(isEqWhite), length, lte(__, 1));
+  return allPass([threeFiguresSameColor, lessThanOneWhite])(colors);
+};
 
 // 6. Ровно две зеленые фигуры (одна из зелёных – это треугольник), плюс одна красная. Четвёртая оставшаяся любого доступного цвета, но не нарушающая первые два условия
 export const validateFieldN6 = (colors) => {
@@ -95,7 +103,7 @@ export const validateFieldN9 = (colors) => all(isEqGreen, values(colors));
 // 10. Треугольник и квадрат одного цвета (не белого), остальные – любого цвета
 export const validateFieldN10 = (colors) => {
   return and(
-      equals(prop('triangle', colors), prop('square', colors)),
-      pipe(prop('triangle'), isEqWhite, not)(colors)
-    );
+    equals(prop('triangle', colors), prop('square', colors)),
+    pipe(prop('triangle'), isEqWhite, not)(colors),
+  );
 };
