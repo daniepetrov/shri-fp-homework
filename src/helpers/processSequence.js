@@ -14,38 +14,63 @@
  * Иногда промисы от API будут приходить в состояние rejected, (прямо как и API в реальной жизни)
  * Ответ будет приходить в поле {result}
  */
- import Api from '../tools/api';
+import { allPass, andThen, gt, ifElse, length, lt, match, otherwise, pipe, prop, tap, __ } from 'ramda';
+import Api from '../tools/api';
 
- const api = new Api();
- 
- /**
-  * Я – пример, удали меня
-  */
- const wait = time => new Promise(resolve => {
-     setTimeout(resolve, time);
- })
- 
- const processSequence = ({value, writeLog, handleSuccess, handleError}) => {
-     /**
-      * Я – пример, удали меня
-      */
-     writeLog(value);
- 
-     api.get('https://api.tech/numbers/base', {from: 2, to: 10, number: '01011010101'}).then(({result}) => {
-         writeLog(result);
-     });
- 
-     wait(2500).then(() => {
-         writeLog('SecondLog')
- 
-         return wait(1500);
-     }).then(() => {
-         writeLog('ThirdLog');
- 
-         return wait(400);
-     }).then(() => {
-         handleSuccess('Done');
-     });
- }
- 
- export default processSequence;
+const api = new Api();
+
+const isPositive = gt(__, 0)
+const isLengthInRange = (a, z) => pipe(
+    length,
+    allPass([
+        gt(__, a),
+        lt(__, z),
+    ])
+)
+const isValidInput = allPass([
+    isPositive,
+    isLengthInRange(2, 10),
+    match(/[0-9.]+/)
+])
+
+const convertToNumber = (value) => Number(value)
+const convertToFixed = (value) => value.toFixed(0)
+const getBinaryFromApi = (value) => api.get('https://api.tech/numbers/base', { from: 10, to: 2, number: value })
+const powToSquare = (value) => value ** 2
+const getRemainder = (value) => value % 3
+const getRandomAnimalFromApi = (id) => api.get(`https://animals.tech/${id}`, null)
+
+const processSequence = ({ value, writeLog, handleSuccess, handleError }) => {
+    pipe(
+        tap(writeLog),
+        ifElse(isValidInput, pipe(
+            convertToNumber,
+            convertToFixed,
+            tap(writeLog),
+            getBinaryFromApi,
+            otherwise(tap(handleError)),
+            andThen(
+                pipe(
+                    prop('result'),
+                    tap(writeLog),
+                    length,
+                    tap(writeLog),
+                    powToSquare,
+                    tap(writeLog),
+                    getRemainder,
+                    tap(writeLog),
+                    getRandomAnimalFromApi,
+                    otherwise(tap(handleError)),
+                    andThen(pipe(
+                        prop('result'),
+                        tap(handleSuccess)
+                    )
+                    )
+                )
+            )
+        ), tap(() => handleError('ValidationError'))),
+
+    )(value)
+}
+
+export default processSequence;
